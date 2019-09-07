@@ -36,7 +36,7 @@ This causes some issues when installing the other dependencies.
 - Conda does not appear to know about Tensorflow's dependency on this version of numpy.
 - Conda overwrites it when you install other dependencies such as matplotlib. 
 
-- As a workaround, you can install all python modules listed in the dependencies via pip, within the conda environment. 
+- As a workaround, you can install all the dependencies via pip, within the conda environment. 
 - This solves the problem completely.
 ```
 </details>
