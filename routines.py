@@ -73,8 +73,8 @@ def reconstruct(dataset, sess, model, callbacks):
 
 
 def generate_gif(dataset, sess, model, callbacks):
-    # creates a gif showing latent-space interpolations betwen randomly selected starting images and ending images
-    # the images are arranged in a square shape, so that many examples can be visualized simultaneously.
+    # creates a gif showing the generative process 'drawing' new data.
+    # generated samples are arranged in a grid, so that many examples can be visualized simultaneously.
 
     def make_image_grid(imgs, grid_height, grid_width):
         assert imgs.shape[0] == grid_height * grid_width
