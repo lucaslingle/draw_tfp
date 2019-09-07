@@ -57,11 +57,13 @@ Create directories for tensorboard logs, checkpoints, and outputs from the model
 ## Training a model
 This implementation supports MNIST, CIFAR-10, and SVHN. 
 
-The default settings are configured with the hyperparameters to train a DRAW model on MNIST.
+The default settings are configured with the hyperparameters to train a DRAW model on MNIST.  
 You can train a DRAW model on MNIST by running
 
 ```
-(draw_virtualenv)$ python app.py --dataset=mnist --epochs=10 --checkpoint_dir=checkpoints/mnist_model_1/ --summaries_dir=tensorboard_logs/mnist_model_1/
+(draw_virtualenv)$ python app.py --dataset=mnist \
+--mode=train --epochs=10 \
+--checkpoint_dir=checkpoints/mnist_model_1/ --summaries_dir=tensorboard_logs/mnist_model_1/ 
 ```
 
 It should be done running in less than an hour, which is a 48x speedup over competing implementations.
@@ -71,7 +73,8 @@ To train a model on SVHN, here are some hyperparameters that work well:
 ```
 (draw_virtualenv)$ python app.py --dataset=svhn_cropped \
 --img_height=32 --img_width=32 --img_channels=3 \
---batch_size=100 --encoder_hidden_dim=512 --decoder_hidden_dim=512 --z_dim=100 --num_timesteps=32 --read_dim=5 --write_dim=5 --lr=0.0001 \
+--batch_size=100 --encoder_hidden_dim=512 --decoder_hidden_dim=512 --z_dim=100 --num_timesteps=32 --read_dim=5 --write_dim=5 \
+--lr=0.0001 \
 --mode=train --epochs=10 \
 --checkpoint_dir=checkpoints/svhn_model_1/ --summaries_dir=tensorboard_logs/svhn_model_1/
 ```
