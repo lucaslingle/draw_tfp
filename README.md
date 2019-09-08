@@ -73,8 +73,10 @@ To train a model on SVHN, here are some hyperparameters that work well:
 ```
 (draw_virtualenv)$ python app.py --dataset=svhn_cropped \
 --img_height=32 --img_width=32 --img_channels=3 \
---batch_size=100 --encoder_hidden_dim=512 --decoder_hidden_dim=512 --z_dim=100 --num_timesteps=32 --read_dim=5 --write_dim=5 \
---lr=0.0001 \
+--batch_size=100 \
+--encoder_hidden_dim=800 --decoder_hidden_dim=800 --read_dim=12 --write_dim=12 --z_dim=100 --num_timesteps=32 \
+--init_scale=0.04 \
+--lr=0.0003 \
 --mode=train --epochs=10 \
 --checkpoint_dir=checkpoints/svhn_model_1/ --summaries_dir=tensorboard_logs/svhn_model_1/
 ```
@@ -86,7 +88,8 @@ Once you've trained a model, you can generate samples like so:
 ```
 (draw_virtualenv)$ python app.py --dataset=svhn_cropped	\
 --img_height=32 --img_width=32 --img_channels=3 \
---batch_size=100 --encoder_hidden_dim=512 --decoder_hidden_dim=512 --z_dim=100 --num_timesteps=32 --read_dim=5 --write_dim=5 \
+--batch_size=100 \
+--encoder_hidden_dim=800 --decoder_hidden_dim=800 --read_dim=12 --write_dim=12 --z_dim=100 --num_timesteps=32 \
 --mode=generate_gif \
 --checkpoint_dir=checkpoints/svhn_model_1/ --load_checkpoint=checkpoints/svhn_model_1/ \
 --output_dir=output/

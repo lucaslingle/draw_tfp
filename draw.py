@@ -19,6 +19,7 @@ class DRAW:
         self.dec_hidden_dim = hps.decoder_hidden_dim
         self.z_dim = hps.z_dim
         self.num_timesteps = hps.num_timesteps
+        self.init_scale = hps.init_scale
         self.lr = hps.lr
 
         self.global_step = tf.train.get_or_create_global_step()
@@ -29,6 +30,9 @@ class DRAW:
             self.x = tf.placeholder(dtype=tf.float32, shape=[None, self.img_height, self.img_width, self.img_channels])
             self.do_inference = tf.placeholder(dtype=tf.bool, shape=[])
             batch_size = tf.shape(self.x)[0]
+
+            init = tf.random_uniform_initializer(-self.init_scale, self.init_scale)
+            tf.get_variable_scope().set_initializer(init)
 
             self.canvas_state_initial = self.get_initial_canvas_state(batch_size)
             self.enc_state_initial = self.get_initial_encoder_state(batch_size)
@@ -75,7 +79,6 @@ class DRAW:
             self.optimizer = tf.train.AdamOptimizer(self.lr)
             tvars = [v for v in tf.trainable_variables() if v.name.startswith(self._name)]
             gradients, _ = zip(*self.optimizer.compute_gradients(loss=self.loss, var_list=tvars))
-            gradients = [None if g is None else tf.clip_by_norm(g, 5.0) for g in gradients]
             self.train_op = self.optimizer.apply_gradients(grads_and_vars=zip(gradients, tvars), global_step=self.global_step)
 
             tf.summary.scalar('elbo', self.elbo)
@@ -111,11 +114,10 @@ class DRAW:
 
     def compute_read_filters(self, decoder_hidden_state):
          with tf.variable_scope('compute_read_filters', reuse=tf.AUTO_REUSE):
-             five_numbers = tf.layers.dense(decoder_hidden_state, units=5, activation=None, 
-                 kernel_initializer=tf.random_uniform_initializer(-0.1, 0.1), bias_initializer=tf.zeros_initializer())
+             five_numbers = tf.layers.dense(decoder_hidden_state, units=5, activation=None)
              g_tilde_X = five_numbers[:, 0]
              g_tilde_Y = five_numbers[:, 1]
-             sigma_squared = tf.exp(2.0 * five_numbers[:, 2])
+             sigma_squared = tf.exp(five_numbers[:, 2])
              delta_tilde = tf.exp(five_numbers[:, 3])
              gamma = tf.exp(five_numbers[:, 4])
              F_X, F_Y = self.compute_filters(g_tilde_X, g_tilde_Y, sigma_squared, delta_tilde, gamma, self.read_dim)
@@ -123,17 +125,16 @@ class DRAW:
 
     def compute_write_filters(self, decoder_hidden_state):
          with tf.variable_scope('compute_write_filters', reuse=tf.AUTO_REUSE):
-             five_numbers = tf.layers.dense(decoder_hidden_state, units=5, activation=None, 
-                kernel_initializer=tf.random_uniform_initializer(-0.1, 0.1), bias_initializer=tf.zeros_initializer())
+             five_numbers = tf.layers.dense(decoder_hidden_state, units=5, activation=None)
              g_tilde_X = five_numbers[:, 0]
              g_tilde_Y = five_numbers[:, 1]
-             sigma_squared = tf.exp(2.0 * five_numbers[:, 2])
+             sigma_squared = tf.exp(five_numbers[:, 2])
              delta_tilde = tf.exp(five_numbers[:, 3])
              gamma = tf.exp(five_numbers[:, 4])
              F_X, F_Y = self.compute_filters(g_tilde_X, g_tilde_Y, sigma_squared, delta_tilde, gamma, self.write_dim)
              return WriteFilters(F_X=F_X, F_Y=F_Y, gamma=gamma)
 
-    def compute_filters(self, g_tilde_X, g_tilde_Y,sigma_squared, delta_tilde, gamma, N):
+    def compute_filters(self, g_tilde_X, g_tilde_Y, sigma_squared, delta_tilde, gamma, N):
         g_X = tf.constant((float(self.img_width + 1) / 2.0)) * (g_tilde_X + 1.0) # [B]
         g_Y = tf.constant((float(self.img_height + 1) / 2.0)) * (g_tilde_Y + 1.0) # [B]
         delta = tf.constant((float(max(self.img_width, self.img_height) - 1.0) / float(N - 1))) * delta_tilde
@@ -203,10 +204,8 @@ class DRAW:
 
     def brushstrokes(self, decoder_hidden_state):
         with tf.variable_scope('brushstrokes', reuse=tf.AUTO_REUSE):
-            k_init = tf.random_uniform_initializer(-0.1, 0.1)
-            b_init = tf.zeros_initializer()
             w_flat = tf.layers.dense(decoder_hidden_state, units=(self.write_dim * self.write_dim * self.img_channels), 
-                activation=None, kernel_initializer=k_init, bias_initializer=b_init)
+                activation=None)
             w = tf.reshape(w_flat, [-1, self.write_dim, self.write_dim, self.img_channels])
             return w
 
@@ -215,8 +214,7 @@ class DRAW:
             h_prev, c_prev = enc_state_prev.h, enc_state_prev.c
 
             vec = tf.concat([tf.layers.flatten(r_x), tf.layers.flatten(r_x_residual), h_prev], axis=-1)
-            fioj = tf.layers.dense(vec, units=(4 * self.enc_hidden_dim), 
-                kernel_initializer=tf.random_uniform_initializer(-0.1, 0.1), bias_initializer=tf.zeros_initializer(), activation=None)
+            fioj = tf.layers.dense(vec, units=(4 * self.enc_hidden_dim), activation=None)
 
             f, i, o, j = tf.split(fioj, 4, axis=1)
             f = tf.nn.sigmoid(f+1.0)
@@ -233,8 +231,7 @@ class DRAW:
             h_prev, c_prev = dec_state_prev.h, dec_state_prev.c
 
             vec = tf.concat([z, h_prev], axis=1)
-            fioj = tf.layers.dense(vec, units=(4 * self.dec_hidden_dim), 
-                kernel_initializer=tf.random_uniform_initializer(-0.1, 0.1), bias_initializer=tf.zeros_initializer(), activation=None)
+            fioj = tf.layers.dense(vec, units=(4 * self.dec_hidden_dim), activation=None)
             
             f, i, o, j = tf.split(fioj, 4, axis=1)
             f = tf.nn.sigmoid(f+1.0)
@@ -248,8 +245,7 @@ class DRAW:
 
     def qz(self, enc_hidden_state):
         with tf.variable_scope('qz', reuse=tf.AUTO_REUSE):
-            fc = tf.layers.dense(enc_hidden_state, units=(2 * self.z_dim), 
-                kernel_initializer=tf.random_uniform_initializer(-0.1, 0.1), bias_initializer=tf.zeros_initializer(), activation=None)
+            fc = tf.layers.dense(enc_hidden_state, units=(2 * self.z_dim), activation=None)
             mu, logsigma = tf.split(fc, 2, axis=1)
             z_dist = tfp.distributions.MultivariateNormalDiag(loc=mu, scale_diag=tf.exp(logsigma))
             z_dist = tfp.distributions.Independent(z_dist)

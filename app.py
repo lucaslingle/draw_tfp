@@ -27,6 +27,7 @@ flags.DEFINE_integer("num_timesteps", 64, "num_timesteps: number of steps for dr
 flags.DEFINE_integer("z_dim", 100, "z_dim: dimension of latent variable z")
 flags.DEFINE_integer("encoder_hidden_dim", 256, "encoder_hidden_dim: number of hidden units in encoder LSTM")
 flags.DEFINE_integer("decoder_hidden_dim", 256, "decoder_hidden_dim: number of hidden units in decoder LSTM")
+flags.DEFINE_float("init_scale", 0.10, "init_scale: scale for weight init")
 flags.DEFINE_float("lr", 0.001, "lr: learning rate for Adam optimizer")
 
 flags.DEFINE_string("summaries_dir", 'tensorboard_logs/', "summaries_dir: directory for tensorboard logs")
@@ -55,6 +56,7 @@ def main(_):
         decoder_hidden_dim = FLAGS.decoder_hidden_dim,
         read_dim = FLAGS.read_dim,
         write_dim = FLAGS.write_dim,
+        init_scale = FLAGS.init_scale,
         lr = FLAGS.lr,
         epochs = FLAGS.epochs)
 
