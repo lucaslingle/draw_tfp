@@ -88,7 +88,8 @@ def main(_):
         'eval': routines.evaluate,
         'generate': routines.generate,
         'reconstruct': routines.reconstruct,
-        'generate_gif': routines.generate_gif
+        'generate_gif': routines.generate_gif,
+        'reconstruct_gif': routines.reconstruct_gif
     }
     routine = mode_to_routine[FLAGS.mode]
 
