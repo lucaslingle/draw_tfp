@@ -2,6 +2,7 @@
 Tensorflow Implementation of 'DRAW: A Recurrent Neural Network For Image Generation'
 
 ![mnist generation gif](assets/mnist_generation.gif)
+![svhn generation gif](assets/svhn_generation.gif)
 
 ## Dependencies
 ```
