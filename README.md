@@ -105,6 +105,7 @@ And you'll get a GIF of the model drawing!
 
 You can also generate visualizations of the model reconstructing real data. You can generate reconstruction gifs like so:
 
+```
 (draw_virtualenv)$ python app.py --dataset=svhn_cropped \
 --img_height=32 --img_width=32 --img_channels=3 \
 --encoder_hidden_dim=800 --decoder_hidden_dim=800 --read_dim=12 --write_dim=12 --z_dim=100 --num_timesteps=32 \
