@@ -17,6 +17,7 @@ class DRAW:
         self.write_dim = hps.write_dim
         self.enc_hidden_dim = hps.encoder_hidden_dim
         self.dec_hidden_dim = hps.decoder_hidden_dim
+        self.forget_bias = hps.forget_bias
         self.z_dim = hps.z_dim
         self.num_timesteps = hps.num_timesteps
         self.init_scale = hps.init_scale
@@ -217,7 +218,7 @@ class DRAW:
             fioj = tf.layers.dense(vec, units=(4 * self.enc_hidden_dim), activation=None)
 
             f, i, o, j = tf.split(fioj, 4, axis=1)
-            f = tf.nn.sigmoid(f+1.0)
+            f = tf.nn.sigmoid(f+self.forget_bias)
             i = tf.nn.sigmoid(i)
             o = tf.nn.sigmoid(o)
             j = tf.nn.tanh(j)
@@ -234,7 +235,7 @@ class DRAW:
             fioj = tf.layers.dense(vec, units=(4 * self.dec_hidden_dim), activation=None)
             
             f, i, o, j = tf.split(fioj, 4, axis=1)
-            f = tf.nn.sigmoid(f+1.0)
+            f = tf.nn.sigmoid(f+self.forget_bias)
             i = tf.nn.sigmoid(i)
             o = tf.nn.sigmoid(o)
             j = tf.nn.tanh(j)

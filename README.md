@@ -3,6 +3,7 @@ Tensorflow Implementation of 'DRAW: A Recurrent Neural Network For Image Generat
 
 ![mnist generation gif](assets/mnist_generation.gif)
 ![svhn generation gif](assets/svhn_generation.gif)
+![cifar10 generation gif](assets/cifar10_generation.gif)
 
 ## Dependencies
 ```
@@ -99,3 +100,20 @@ Once you've trained a model, you can generate samples like so:
 And you'll get a GIF of the model drawing!
 
 ![svhn generation gif](assets/svhn_generation.gif)
+
+## Generating reconstructions
+
+You can also generate visualizations of the model reconstructing real data. You can generate reconstruction gifs like so:
+
+(draw_virtualenv)$ python app.py --dataset=svhn_cropped \
+--img_height=32 --img_width=32 --img_channels=3 \
+--encoder_hidden_dim=800 --decoder_hidden_dim=800 --read_dim=12 --write_dim=12 --z_dim=100 --num_timesteps=32 \
+--mode=generate_gif \
+--checkpoint_dir=checkpoints/svhn_model_1/ --load_checkpoint=checkpoints/svhn_model_1/ \
+--output_dir=output/
+```
+
+And you'll get a GIF of the reconstruction process!
+
+![svhn reconstruction gif](assets/svhn_reconstruction.gif)
+![cifar10 reconstruction gif](assets/cifar10_reconstruction.gif)
