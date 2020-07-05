@@ -116,7 +116,7 @@ def main(_):
             'save_png': calls.save_png(output_dir),
             'save_gif': calls.save_gif(output_dir)
         }
-        routine(ds_train, sess, model, callbacks)
+        routine(ds_test, sess, model, callbacks)
 
 
 if __name__ == '__main__':
