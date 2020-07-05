@@ -32,10 +32,15 @@ def preprocess_dataset(name, dataset, hps, epochs):
     else:
         f5 = lambda img: tf.image.resize_images(img, [hps.img_height, hps.img_width])
 
-    f6 = lambda img: img + tf.random_uniform(minval=0.0, maxval=(1.0/256.0), shape=[hps.img_height, hps.img_width, hps.img_channels])
-    f7 = lambda img: tf.cast(img, dtype=tf.float32)
+    if hps.img_channels == 1:
+        f6 = lambda img: tf.expand_dims(img[:,:,0], -1)
+    else:
+        f6 = lambda img: img
 
-    normalize_pixels = lambda row: f7(f6(f5(f4(f3(f2(f1(row)))))))
+    f7 = lambda img: img + tf.random_uniform(minval=0.0, maxval=(1.0/256.0), shape=[hps.img_height, hps.img_width, hps.img_channels])
+    f8 = lambda img: tf.cast(img, dtype=tf.float32)
+
+    normalize_pixels = lambda row: f8(f7(f6(f5(f4(f3(f2(f1(row))))))))
     ds = dataset.map(normalize_pixels)
     ds = ds.shuffle(1000)
     ds = ds.batch(batch_size)

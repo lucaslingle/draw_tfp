@@ -274,6 +274,14 @@ class DRAW:
         _, elbo, step, summaries = sess.run([self.train_op, self.elbo, self.global_step, self.merged_summaries], feed_dict=feed_dict)
         return elbo, step, summaries
 
+    def evaluate(self, sess, x):
+        feed_dict = {
+            self.x: x,
+            self.do_inference: True
+        }
+        elbo = sess.run(self.elbo, feed_dict=feed_dict)
+        return elbo
+
     def reconstruct(self, sess, x):
         feed_dict = {
             self.x: x,
